@@ -60,9 +60,16 @@ app.get('/qr', (req, res) => {
 app.get('/barcode', (req, res) => {
   const { text, showText = 'true' } = req.query;
 
-  if (!text) {
+  if (typeof text !== 'string' || text.length === 0) {
     return res.status(400).json({
-      error: 'Missing required parameter: text',
+      error: 'Missing or invalid required parameter: text (must be a non-empty string)',
+      example: '/barcode?text=SKU-12345&showText=true',
+    });
+  }
+
+  if (typeof showText !== 'string') {
+    return res.status(400).json({
+      error: 'Invalid parameter: showText (must be "true" or "false")',
       example: '/barcode?text=SKU-12345&showText=true',
     });
   }
