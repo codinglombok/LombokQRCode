@@ -143,14 +143,24 @@
         const qrSvg = renderQRToSVG(text, { template: activeTemplate });
         document.getElementById('qrSvg').innerHTML = qrSvg;
       } catch (e) {
-        document.getElementById('qrSvg').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`;
+        const qrError = document.createElement('p');
+        qrError.style.color = 'red';
+        qrError.textContent = `Error: ${e?.message ?? String(e)}`;
+        const qrContainer = document.getElementById('qrSvg');
+        qrContainer.innerHTML = '';
+        qrContainer.appendChild(qrError);
       }
 
       try {
         const barcodeSvg = renderCode128ToSVG(text.slice(0, 20), { showText: true });
         document.getElementById('barcodeSvg').innerHTML = barcodeSvg;
       } catch (e) {
-        document.getElementById('barcodeSvg').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`;
+        const barcodeError = document.createElement('p');
+        barcodeError.style.color = 'red';
+        barcodeError.textContent = `Error: ${e?.message ?? String(e)}`;
+        const barcodeContainer = document.getElementById('barcodeSvg');
+        barcodeContainer.innerHTML = '';
+        barcodeContainer.appendChild(barcodeError);
       }
     };
 
