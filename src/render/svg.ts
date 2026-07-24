@@ -60,6 +60,15 @@ function resolveTemplate(t?: QRTemplate | string): QRTemplate {
   return { ...BUILTIN_TEMPLATES.classic, ...t };
 }
 
+function sanitizeColor(value: string | undefined, fallback: string): string {
+  if (!value) return fallback;
+  const v = value.trim();
+  const hex = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+  const rgb = /^rgba?\(\s*(?:\d{1,3}\s*,\s*){2}\d{1,3}(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)$/;
+  const hsl = /^hsla?\(\s*\d{1,3}(?:deg)?\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)$/;
+  return hex.test(v) || rgb.test(v) || hsl.test(v) ? v : fallback;
+}
+
 function isFinderZone(x: number, y: number, size: number): boolean {
   const inTL = x < 7 && y < 7;
   const inTR = x >= size - 7 && y < 7;
@@ -117,11 +126,15 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
   const totalModules = n + margin * 2;
   const px = totalModules * moduleSize;
 
+  const safeBackground = sanitizeColor(t.background, '#ffffff');
+  const safeForeground = sanitizeColor(t.foreground, '#000000');
   const gradientId = 'lombok-qr-gradient';
   let defs = '';
-  let fillRef = t.foreground ?? '#000000';
+  let fillRef = safeForeground;
   if (t.gradient) {
     const { type, colors, angle = 0 } = t.gradient;
+    const c0 = sanitizeColor(colors[0], safeForeground);
+    const c1 = sanitizeColor(colors[1], safeForeground);
     if (type === 'linear') {
       const rad = (angle * Math.PI) / 180;
       const x2 = (Math.cos(rad) * 50 + 50).toFixed(1);
@@ -129,13 +142,13 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
       const x1 = (100 - Number(x2)).toFixed(1);
       const y1 = (100 - Number(y2)).toFixed(1);
       defs = `<linearGradient id="${gradientId}" x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%">
-        <stop offset="0%" stop-color="${colors[0]}" />
-        <stop offset="100%" stop-color="${colors[1]}" />
+        <stop offset="0%" stop-color="${c0}" />
+        <stop offset="100%" stop-color="${c1}" />
       </linearGradient>`;
     } else {
       defs = `<radialGradient id="${gradientId}">
-        <stop offset="0%" stop-color="${colors[0]}" />
-        <stop offset="100%" stop-color="${colors[1]}" />
+        <stop offset="0%" stop-color="${c0}" />
+        <stop offset="100%" stop-color="${c1}" />
       </radialGradient>`;
     }
     fillRef = `url(#${gradientId})`;
@@ -181,7 +194,7 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${px} ${px}" width="${px}" height="${px}" role="img" aria-label="QR code">
   ${defs ? `<defs>${defs}</defs>` : ''}
-  <rect width="${px}" height="${px}" fill="${t.background ?? '#ffffff'}" />
+  <rect width="${px}" height="${px}" fill="${safeBackground}" />
   <g fill="${fillRef}">${dots.join('')}</g>
   <g style="color:${fillRef}">${finders.join('')}</g>
   ${logoMarkup}
