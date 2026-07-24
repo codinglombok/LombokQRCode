@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LombokQRCode — Vanilla JS Example</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 { color: #333; margin-bottom: 1rem; }
+    .form-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #0284c7; }
+    .templates {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .template-btn {
+      padding: 0.5rem;
+      background: #f0f0f0;
+      color: #333;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .template-btn.active { border-color: #0ea5e9; background: #e0f2fe; }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .output {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .output h3 { margin-bottom: 0.5rem; font-size: 0.9rem; color: #666; }
+    #qrSvg, #barcodeSvg {
+      max-width: 100%;
+      border: 1px solid #ddd;
+      padding: 0.5rem;
+      background: white;
+    }
+    .download-btn {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 600px) {
+      .container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>LombokQRCode — Vanilla Example</h1>
+  
+  <div class="form-group">
+    <input type="text" id="input" placeholder="Enter text for QR code" value="https://github.com/codinglombok/LombokQRCode" />
+    <button onclick="generateCodes()">Generate</button>
+  </div>
+
+  <div>
+    <label>Template:</label>
+    <div class="templates" id="templateList"></div>
+  </div>
+
+  <div class="container">
+    <div class="output">
+      <h3>QR Code</h3>
+      <div id="qrSvg"></div>
+      <button class="download-btn" onclick="downloadSVG('qrSvg', 'qrcode.svg')">Download SVG</button>
+    </div>
+    <div class="output">
+      <h3>Code128 Barcode</h3>
+      <div id="barcodeSvg"></div>
+      <button class="download-btn" onclick="downloadSVG('barcodeSvg', 'barcode.svg')">Download SVG</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { renderQRToSVG, renderCode128ToSVG, listTemplates } from 'https://unpkg.com/lombokqrcode/dist/index.mjs';
+    
+    window.renderQRToSVG = renderQRToSVG;
+    window.renderCode128ToSVG = renderCode128ToSVG;
+    window.listTemplates = listTemplates;
+    
+    // Initialize template buttons
+    const templates = listTemplates();
+    const templateList = document.getElementById('templateList');
+    templates.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'template-btn ' + (t === 'classic' ? 'active' : '');
+      btn.textContent = t;
+      btn.onclick = () => {
+        document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        generateCodes();
+      };
+      templateList.appendChild(btn);
+    });
+
+    window.generateCodes = function() {
+      const text = document.getElementById('input').value;
+      if (!text) return;
+
+      const activeTemplate = document.querySelector('.template-btn.active').textContent;
+      
+      try {
+        const qrSvg = renderQRToSVG(text, { template: activeTemplate });
+        document.getElementById('qrSvg').innerHTML = qrSvg;
+      } catch (e) {
+        document.getElementById('qrSvg').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`;
+      }
+
+      try {
+        const barcodeSvg = renderCode128ToSVG(text.slice(0, 20), { showText: true });
+        document.getElementById('barcodeSvg').innerHTML = barcodeSvg;
+      } catch (e) {
+        document.getElementById('barcodeSvg').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`;
+      }
+    };
+
+    window.downloadSVG = function(elementId, filename) {
+      const svg = document.getElementById(elementId).innerHTML;
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Generate on load
+    generateCodes();
+  </script>
+</body>
+</html>

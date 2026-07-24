@@ -1,0 +1,60 @@
+{
+  "name": "lombokqrcode",
+  "version": "0.1.0",
+  "description": "A from-scratch, dependency-free QR code and Code128 barcode library: generation, styled templating, and camera scanning — with i18n, TypeScript types, and MIT/Apache-friendly clean-room encoding.",
+  "license": "Apache-2.0",
+  "author": "codinglombok",
+  "homepage": "https://github.com/codinglombok/LombokQRCode",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codinglombok/LombokQRCode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codinglombok/LombokQRCode/issues"
+  },
+  "keywords": [
+    "qrcode",
+    "qr-code",
+    "barcode",
+    "code128",
+    "generator",
+    "scanner",
+    "svg",
+    "typescript",
+    "i18n"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "lombardqrcode": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "node --test dist-test-run/**/*.test.js",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
