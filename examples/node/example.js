@@ -23,9 +23,16 @@ const port = process.env.PORT || 3000;
 app.get('/qr', (req, res) => {
   const { text, template = 'classic', level = 'M' } = req.query;
 
-  if (!text) {
+  if (typeof text !== 'string' || text.length === 0) {
     return res.status(400).json({
-      error: 'Missing required parameter: text',
+      error: 'Missing or invalid required parameter: text (must be a non-empty string)',
+      example: '/qr?text=Hello&template=ocean&level=H',
+    });
+  }
+
+  if (typeof level !== 'string') {
+    return res.status(400).json({
+      error: 'Invalid parameter: level (must be one of L, M, Q, H)',
       example: '/qr?text=Hello&template=ocean&level=H',
     });
   }
