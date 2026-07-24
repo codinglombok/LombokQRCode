@@ -69,6 +69,25 @@ function sanitizeColor(value: string | undefined, fallback: string): string {
   return hex.test(v) || rgb.test(v) || hsl.test(v) ? v : fallback;
 }
 
+function sanitizeLogoHref(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const v = value.trim();
+  if (!v) return undefined;
+  const lower = v.toLowerCase();
+
+  const isSafeHttp = lower.startsWith('http://') || lower.startsWith('https://');
+  const isSafeRootRelative = v.startsWith('/');
+  const isSafeDataImage = lower.startsWith('data:image/');
+
+  if (!isSafeHttp && !isSafeRootRelative && !isSafeDataImage) return undefined;
+
+  return v
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function isFinderZone(x: number, y: number, size: number): boolean {
   const inTL = x < 7 && y < 7;
   const inTR = x >= size - 7 && y < 7;
@@ -189,7 +208,10 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
     const bg = t.logo.backgroundInset
       ? `<rect x="${logoX - moduleSize}" y="${logoY - moduleSize}" width="${logoSize + moduleSize * 2}" height="${logoSize + moduleSize * 2}" rx="${moduleSize}" fill="${t.background ?? '#ffffff'}" />`
       : '';
-    logoMarkup = `${bg}<image href="${t.logo.href}" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" preserveAspectRatio="xMidYMid meet" />`;
+    const safeLogoHref = sanitizeLogoHref(t.logo.href);
+    logoMarkup = safeLogoHref
+      ? `${bg}<image href="${safeLogoHref}" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" preserveAspectRatio="xMidYMid meet" />`
+      : '';
   }
 
   const safeFillRefAttr = fillRef
