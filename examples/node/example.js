@@ -30,9 +30,18 @@ app.get('/qr', (req, res) => {
     });
   }
 
+  const templateName = String(template);
+  const allowedTemplates = listTemplates();
+  if (!allowedTemplates.includes(templateName)) {
+    return res.status(400).json({
+      error: `Invalid template: ${templateName}`,
+      allowedTemplates,
+    });
+  }
+
   try {
     const svg = renderQRToSVG(text, {
-      template,
+      template: templateName,
       errorCorrectionLevel: level,
     });
     res.set('Content-Type', 'image/svg+xml');
