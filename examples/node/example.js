@@ -21,12 +21,26 @@ const port = process.env.PORT || 3000;
  * Generates a QR code SVG.
  */
 app.get('/qr', (req, res) => {
-  const { text, template = 'classic', level = 'M' } = req.query;
+  const text = req.query.text;
+  const template = req.query.template ?? 'classic';
+  const level = req.query.level ?? 'M';
 
-  if (!text) {
+  if (typeof text !== 'string' || text.length === 0) {
     return res.status(400).json({
-      error: 'Missing required parameter: text',
+      error: 'Missing or invalid required parameter: text (must be a non-empty string)',
       example: '/qr?text=Hello&template=ocean&level=H',
+    });
+  }
+
+  if (typeof template !== 'string') {
+    return res.status(400).json({
+      error: 'Invalid parameter: template (must be a string)',
+    });
+  }
+
+  if (typeof level !== 'string') {
+    return res.status(400).json({
+      error: 'Invalid parameter: level (must be a string)',
     });
   }
 
@@ -49,12 +63,19 @@ app.get('/qr', (req, res) => {
  * Generates a Code128 barcode SVG.
  */
 app.get('/barcode', (req, res) => {
-  const { text, showText = 'true' } = req.query;
+  const text = req.query.text;
+  const showText = req.query.showText ?? 'true';
 
-  if (!text) {
+  if (typeof text !== 'string' || text.length === 0) {
     return res.status(400).json({
-      error: 'Missing required parameter: text',
+      error: 'Missing or invalid required parameter: text (must be a non-empty string)',
       example: '/barcode?text=SKU-12345&showText=true',
+    });
+  }
+
+  if (typeof showText !== 'string') {
+    return res.status(400).json({
+      error: 'Invalid parameter: showText (must be a string)',
     });
   }
 
