@@ -206,7 +206,7 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
     const logoX = (px - logoSize) / 2;
     const logoY = (px - logoSize) / 2;
     const bg = t.logo.backgroundInset
-      ? `<rect x="${logoX - moduleSize}" y="${logoY - moduleSize}" width="${logoSize + moduleSize * 2}" height="${logoSize + moduleSize * 2}" rx="${moduleSize}" fill="${t.background ?? '#ffffff'}" />`
+      ? `<rect x="${logoX - moduleSize}" y="${logoY - moduleSize}" width="${logoSize + moduleSize * 2}" height="${logoSize + moduleSize * 2}" rx="${moduleSize}" fill="${safeBackground}" />`
       : '';
     const safeLogoHref = sanitizeLogoHref(t.logo.href);
     logoMarkup = safeLogoHref
