@@ -38,6 +38,14 @@ app.get('/qr', (req, res) => {
     });
   }
 
+  const availableTemplates = listTemplates();
+  if (!availableTemplates.includes(template)) {
+    return res.status(400).json({
+      error: 'Invalid parameter: template (must be one of the supported template names)',
+      availableTemplates,
+    });
+  }
+
   if (typeof level !== 'string') {
     return res.status(400).json({
       error: 'Invalid parameter: level (must be a string)',
