@@ -54,7 +54,7 @@ app.get('/qr', (req, res) => {
 
   try {
     const svg = renderQRToSVG(text, {
-      template,
+      template: templateName,
       errorCorrectionLevel: level,
     });
     res.set('Content-Type', 'image/svg+xml');

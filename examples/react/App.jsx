@@ -18,14 +18,18 @@ export default function App() {
       const svg = renderQRToSVG(text, { template });
       setQrSvg(svg);
     } catch (e) {
-      setQrSvg(`<p style="color:red;">Error: ${e.message}</p>`);
+      setQrSvg(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 48" role="img" aria-label="QR render error"><text x="8" y="30" fill="#dc2626" font-size="16">Error rendering QR code.</text></svg>'
+      );
     }
 
     try {
       const svg = renderCode128ToSVG(text.slice(0, 20), { showText: true });
       setBarcodeSvg(svg);
     } catch (e) {
-      setBarcodeSvg(`<p style="color:red;">Error: ${e.message}</p>`);
+      setBarcodeSvg(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 48" role="img" aria-label="Barcode render error"><text x="8" y="30" fill="#dc2626" font-size="16">Error rendering barcode.</text></svg>'
+      );
     }
   }, [text, template]);
 

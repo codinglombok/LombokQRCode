@@ -60,6 +60,43 @@ function resolveTemplate(t?: QRTemplate | string): QRTemplate {
   return { ...BUILTIN_TEMPLATES.classic, ...t };
 }
 
+function sanitizeColor(value: string | undefined, fallback: string): string {
+  if (!value) return fallback;
+  const v = value.trim();
+  const hex = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+  const rgb = /^rgba?\(\s*(?:\d{1,3}\s*,\s*){2}\d{1,3}(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)$/;
+  const hsl = /^hsla?\(\s*\d{1,3}(?:deg)?\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)$/;
+  return hex.test(v) || rgb.test(v) || hsl.test(v) ? v : fallback;
+}
+
+function sanitizeNumber(value: unknown, fallback: number, min?: number, max?: number): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  let out = n;
+  if (typeof min === 'number') out = Math.max(min, out);
+  if (typeof max === 'number') out = Math.min(max, out);
+  return out;
+}
+
+function sanitizeLogoHref(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const v = value.trim();
+  if (!v) return undefined;
+  const lower = v.toLowerCase();
+
+  const isSafeHttp = lower.startsWith('http://') || lower.startsWith('https://');
+  const isSafeRootRelative = v.startsWith('/');
+  const isSafeDataImage = lower.startsWith('data:image/');
+
+  if (!isSafeHttp && !isSafeRootRelative && !isSafeDataImage) return undefined;
+
+  return v
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function isFinderZone(x: number, y: number, size: number): boolean {
   const inTL = x < 7 && y < 7;
   const inTR = x >= size - 7 && y < 7;
@@ -111,17 +148,21 @@ export function renderQRToSVG(text: string, options: RenderOptions = {}): string
 
 export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string): string {
   const t = resolveTemplate(template);
-  const moduleSize = t.moduleSize ?? 10;
-  const margin = t.margin ?? 4;
+  const moduleSize = sanitizeNumber(t.moduleSize, 10, 1);
+  const margin = sanitizeNumber(t.margin, 4, 0);
   const n = result.size;
   const totalModules = n + margin * 2;
   const px = totalModules * moduleSize;
 
+  const safeBackground = sanitizeColor(t.background, '#ffffff');
+  const safeForeground = sanitizeColor(t.foreground, '#000000');
   const gradientId = 'lombok-qr-gradient';
   let defs = '';
-  let fillRef = t.foreground ?? '#000000';
+  let fillRef = safeForeground;
   if (t.gradient) {
     const { type, colors, angle = 0 } = t.gradient;
+    const c0 = sanitizeColor(colors[0], safeForeground);
+    const c1 = sanitizeColor(colors[1], safeForeground);
     if (type === 'linear') {
       const rad = (angle * Math.PI) / 180;
       const x2 = (Math.cos(rad) * 50 + 50).toFixed(1);
@@ -129,13 +170,13 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
       const x1 = (100 - Number(x2)).toFixed(1);
       const y1 = (100 - Number(y2)).toFixed(1);
       defs = `<linearGradient id="${gradientId}" x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%">
-        <stop offset="0%" stop-color="${colors[0]}" />
-        <stop offset="100%" stop-color="${colors[1]}" />
+        <stop offset="0%" stop-color="${c0}" />
+        <stop offset="100%" stop-color="${c1}" />
       </linearGradient>`;
     } else {
       defs = `<radialGradient id="${gradientId}">
-        <stop offset="0%" stop-color="${colors[0]}" />
-        <stop offset="100%" stop-color="${colors[1]}" />
+        <stop offset="0%" stop-color="${c0}" />
+        <stop offset="100%" stop-color="${c1}" />
       </radialGradient>`;
     }
     fillRef = `url(#${gradientId})`;
@@ -169,21 +210,30 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
 
   let logoMarkup = '';
   if (t.logo) {
-    const ratio = Math.min(Math.max(t.logo.sizeRatio ?? 0.2, 0.1), 0.35);
-    const logoSize = px * ratio;
-    const logoX = (px - logoSize) / 2;
-    const logoY = (px - logoSize) / 2;
+    const ratio = sanitizeNumber(t.logo.sizeRatio, 0.2, 0.1, 0.35);
+    const logoSize = sanitizeNumber(px * ratio, px * 0.2, 0);
+    const logoX = sanitizeNumber((px - logoSize) / 2, 0);
+    const logoY = sanitizeNumber((px - logoSize) / 2, 0);
     const bg = t.logo.backgroundInset
-      ? `<rect x="${logoX - moduleSize}" y="${logoY - moduleSize}" width="${logoSize + moduleSize * 2}" height="${logoSize + moduleSize * 2}" rx="${moduleSize}" fill="${t.background ?? '#ffffff'}" />`
+      ? `<rect x="${sanitizeNumber(logoX - moduleSize, 0)}" y="${sanitizeNumber(logoY - moduleSize, 0)}" width="${sanitizeNumber(logoSize + moduleSize * 2, 0)}" height="${sanitizeNumber(logoSize + moduleSize * 2, 0)}" rx="${sanitizeNumber(moduleSize, 10, 0)}" fill="${safeBackground}" />`
       : '';
-    logoMarkup = `${bg}<image href="${t.logo.href}" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" preserveAspectRatio="xMidYMid meet" />`;
+    const safeLogoHref = sanitizeLogoHref(t.logo.href);
+    logoMarkup = safeLogoHref
+      ? `${bg}<image href="${safeLogoHref}" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" preserveAspectRatio="xMidYMid meet" />`
+      : '';
   }
+
+  const safeFillRefAttr = fillRef
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${px} ${px}" width="${px}" height="${px}" role="img" aria-label="QR code">
   ${defs ? `<defs>${defs}</defs>` : ''}
-  <rect width="${px}" height="${px}" fill="${t.background ?? '#ffffff'}" />
-  <g fill="${fillRef}">${dots.join('')}</g>
-  <g style="color:${fillRef}">${finders.join('')}</g>
+  <rect width="${px}" height="${px}" fill="${safeBackground}" />
+  <g fill="${safeFillRefAttr}">${dots.join('')}</g>
+  <g style="color:${safeFillRefAttr}">${finders.join('')}</g>
   ${logoMarkup}
 </svg>`;
 }
