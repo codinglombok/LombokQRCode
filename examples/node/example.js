@@ -21,7 +21,9 @@ const port = process.env.PORT || 3000;
  * Generates a QR code SVG.
  */
 app.get('/qr', (req, res) => {
-  const { text, template = 'classic', level = 'M' } = req.query;
+  const text = req.query.text;
+  const template = req.query.template ?? 'classic';
+  const level = req.query.level ?? 'M';
 
   if (typeof text !== 'string' || text.length === 0) {
     return res.status(400).json({
@@ -30,19 +32,23 @@ app.get('/qr', (req, res) => {
     });
   }
 
-  if (typeof level !== 'string') {
+  if (typeof template !== 'string') {
     return res.status(400).json({
-      error: 'Invalid parameter: level (must be one of L, M, Q, H)',
-      example: '/qr?text=Hello&template=ocean&level=H',
+      error: 'Invalid parameter: template (must be a string)',
     });
   }
 
-  const templateName = String(template);
-  const allowedTemplates = listTemplates();
-  if (!allowedTemplates.includes(templateName)) {
+  const availableTemplates = listTemplates();
+  if (!availableTemplates.includes(template)) {
     return res.status(400).json({
-      error: `Invalid template: ${templateName}`,
-      allowedTemplates,
+      error: 'Invalid parameter: template (must be one of the supported template names)',
+      availableTemplates,
+    });
+  }
+
+  if (typeof level !== 'string') {
+    return res.status(400).json({
+      error: 'Invalid parameter: level (must be a string)',
     });
   }
 
@@ -65,7 +71,8 @@ app.get('/qr', (req, res) => {
  * Generates a Code128 barcode SVG.
  */
 app.get('/barcode', (req, res) => {
-  const { text, showText = 'true' } = req.query;
+  const text = req.query.text;
+  const showText = req.query.showText ?? 'true';
 
   if (typeof text !== 'string' || text.length === 0) {
     return res.status(400).json({
@@ -76,8 +83,7 @@ app.get('/barcode', (req, res) => {
 
   if (typeof showText !== 'string') {
     return res.status(400).json({
-      error: 'Invalid parameter: showText (must be "true" or "false")',
-      example: '/barcode?text=SKU-12345&showText=true',
+      error: 'Invalid parameter: showText (must be a string)',
     });
   }
 
