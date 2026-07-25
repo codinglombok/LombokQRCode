@@ -69,6 +69,15 @@ function sanitizeColor(value: string | undefined, fallback: string): string {
   return hex.test(v) || rgb.test(v) || hsl.test(v) ? v : fallback;
 }
 
+function sanitizeNumber(value: unknown, fallback: number, min?: number, max?: number): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  let out = n;
+  if (typeof min === 'number') out = Math.max(min, out);
+  if (typeof max === 'number') out = Math.min(max, out);
+  return out;
+}
+
 function sanitizeLogoHref(value: string | undefined): string | undefined {
   if (!value) return undefined;
   const v = value.trim();
@@ -139,8 +148,8 @@ export function renderQRToSVG(text: string, options: RenderOptions = {}): string
 
 export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string): string {
   const t = resolveTemplate(template);
-  const moduleSize = t.moduleSize ?? 10;
-  const margin = t.margin ?? 4;
+  const moduleSize = sanitizeNumber(t.moduleSize, 10, 1);
+  const margin = sanitizeNumber(t.margin, 4, 0);
   const n = result.size;
   const totalModules = n + margin * 2;
   const px = totalModules * moduleSize;
@@ -201,12 +210,12 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
 
   let logoMarkup = '';
   if (t.logo) {
-    const ratio = Math.min(Math.max(t.logo.sizeRatio ?? 0.2, 0.1), 0.35);
-    const logoSize = px * ratio;
-    const logoX = (px - logoSize) / 2;
-    const logoY = (px - logoSize) / 2;
+    const ratio = sanitizeNumber(t.logo.sizeRatio, 0.2, 0.1, 0.35);
+    const logoSize = sanitizeNumber(px * ratio, px * 0.2, 0);
+    const logoX = sanitizeNumber((px - logoSize) / 2, 0);
+    const logoY = sanitizeNumber((px - logoSize) / 2, 0);
     const bg = t.logo.backgroundInset
-      ? `<rect x="${logoX - moduleSize}" y="${logoY - moduleSize}" width="${logoSize + moduleSize * 2}" height="${logoSize + moduleSize * 2}" rx="${moduleSize}" fill="${safeBackground}" />`
+      ? `<rect x="${sanitizeNumber(logoX - moduleSize, 0)}" y="${sanitizeNumber(logoY - moduleSize, 0)}" width="${sanitizeNumber(logoSize + moduleSize * 2, 0)}" height="${sanitizeNumber(logoSize + moduleSize * 2, 0)}" rx="${sanitizeNumber(moduleSize, 10, 0)}" fill="${safeBackground}" />`
       : '';
     const safeLogoHref = sanitizeLogoHref(t.logo.href);
     logoMarkup = safeLogoHref
