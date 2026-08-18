@@ -113,7 +113,7 @@ function dotPath(x: number, y: number, s: number, style: DotStyle): string {
     case 'rounded':
       return `<rect x="${x}" y="${y}" width="${s}" height="${s}" rx="${s * 0.3}" ry="${s * 0.3}" />`;
     case 'classy':
-      return `<rect x="${x}" y="${y}" width="${s}" height="${s}" rx="${s * 0.15}" ry="${s * 0.15}" transform="rotate(45 ${cx} ${cy}) scale(0.9)" transform-origin="${cx} ${cy}" />`;
+      return `<g transform="translate(${cx},${cy}) rotate(45) scale(0.9) translate(${-cx},${-cy})"><rect x="${x}" y="${y}" width="${s}" height="${s}" rx="${s * 0.15}" ry="${s * 0.15}" /></g>`;
     case 'square':
     default:
       return `<rect x="${x}" y="${y}" width="${s}" height="${s}" />`;

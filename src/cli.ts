@@ -19,8 +19,8 @@ if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
 LombokQRCode CLI
 
 Usage:
-  lombardqrcode qr <text> [options]
-  lombardqrcode barcode <text> [options]
+  lombokqrcode qr <text> [options]
+  lombokqrcode barcode <text> [options]
 
 Options for QR:
   --template <name>        Built-in template (classic, rounded, dots, ocean, sunset, midnight)
@@ -32,8 +32,8 @@ Options for Barcode:
   --output <file>          Output SVG file (default: stdout)
 
 Examples:
-  lombardqrcode qr "https://example.com" --template ocean --output qr.svg
-  lombardqrcode barcode "SKU-12345" --show-text --output barcode.svg
+  lombokqrcode qr "https://example.com" --template ocean --output qr.svg
+  lombokqrcode barcode "SKU-12345" --show-text --output barcode.svg
 
 Templates: ${listTemplates().join(', ')}
   `);

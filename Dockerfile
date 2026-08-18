@@ -1,23 +1,31 @@
-FROM node:18-alpine
+# ── Build stage ──────────────────────────────────────
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# Build stage
 COPY package*.json tsconfig.build.json ./
 COPY src ./src
 RUN npm ci && npm run build
 
-# Runtime stage — remove dev deps, keep only dist and production node_modules
-RUN npm ci --only=production
+# ── Runtime stage ────────────────────────────────────
+FROM node:18-alpine
 
-# Expose port for the example Express server
+WORKDIR /app
+
+# Copy built dist from build stage
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package.json ./
+
+# Copy example server and install its runtime dependency
+COPY examples/node/example.js ./
+RUN npm init -y > /dev/null 2>&1 && npm install express lombokqrcode --save 2>/dev/null || true
+
+# Fallback: link local dist as lombokqrcode so require('lombokqrcode') resolves
+RUN mkdir -p node_modules/lombokqrcode && \
+    cp -r dist node_modules/lombokqrcode/ && \
+    cp package.json node_modules/lombokqrcode/
+
+ENV NODE_ENV=production
 EXPOSE 3000
 
-# Copy example server
-COPY examples/node/example.js ./
-
-# Set NODE_ENV
-ENV NODE_ENV=production
-
-# Start the example server
 CMD ["node", "example.js"]

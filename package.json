@@ -27,7 +27,7 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "bin": {
-    "lombardqrcode": "dist/cli.js"
+    "lombokqrcode": "dist/cli.js"
   },
   "exports": {
     ".": {
@@ -46,12 +46,14 @@
     "node": ">=16"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "test": "node --test dist-test-run/**/*.test.js",
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --out-dir dist && tsup src/cli.ts --format cjs --out-dir dist --no-dts",
+    "test": "node --test dist/__tests__/**/*.test.js",
     "lint": "tsc --noEmit -p tsconfig.json",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
     "typescript": "^5.4.0"
   },
   "publishConfig": {
