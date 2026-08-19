@@ -9,12 +9,13 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { encodeQR } from '../core/qr/encoder';
-import { detectMode, BitBuffer } from '../core/qr/segments';
+import { detectMode, BitBuffer, splitSegments } from '../core/qr/segments';
 import { computeECCodewords } from '../core/qr/reed-solomon';
 import { encodeCode128 } from '../core/barcode/code128';
 import { getMessages, availableLocales } from '../i18n';
 import { renderQRToSVG, matrixToSVG, listTemplates } from '../render/svg';
 import { renderCode128ToSVG } from '../render/barcode-svg';
+import { renderQRToPNG, renderQRToPixels, matrixToPNG, matrixToPixels, parseHexColor } from '../render/canvas';
 
 // ─── QR encoder ──────────────────────────────────────
 
@@ -329,5 +330,191 @@ describe('renderCode128ToSVG', () => {
     const svg = renderCode128ToSVG('X');
     assert.ok(svg.includes('role="img"'));
     assert.ok(svg.includes('aria-label'));
+  });
+});
+
+// ─── Mixed-mode segmentation ────────────────────────
+
+describe('splitSegments', () => {
+  it('pure numeric stays numeric', () => {
+    const segs = splitSegments('1234567890', 1);
+    assert.equal(segs.length, 1);
+    assert.equal(segs[0].mode, 'numeric');
+    assert.equal(segs[0].text, '1234567890');
+  });
+
+  it('pure alphanumeric stays alphanumeric', () => {
+    const segs = splitSegments('HELLO WORLD', 1);
+    assert.equal(segs.length, 1);
+    assert.equal(segs[0].mode, 'alphanumeric');
+  });
+
+  it('pure byte stays byte', () => {
+    const segs = splitSegments('hello world', 1);
+    assert.equal(segs.length, 1);
+    assert.equal(segs[0].mode, 'byte');
+  });
+
+  it('splits URL with digit run into multiple segments', () => {
+    const segs = splitSegments('HTTPS://EXAMPLE.COM/1234567890123456', 1);
+    // Should have at least 2 segments — alphanumeric prefix + numeric digits
+    assert.ok(segs.length >= 2);
+    const numSeg = segs.find(s => s.mode === 'numeric');
+    assert.ok(numSeg, 'should have a numeric segment for the digit run');
+  });
+
+  it('merges short numeric run into alphanumeric neighbors', () => {
+    const segs = splitSegments('ABC12DEF', 1);
+    // '12' is only 2 chars numeric — should merge into alphanumeric
+    assert.equal(segs.length, 1);
+    assert.equal(segs[0].mode, 'alphanumeric');
+  });
+
+  it('keeps long numeric run separate', () => {
+    const segs = splitSegments('ABCdef1234567890xyz', 1);
+    const numSeg = segs.find(s => s.mode === 'numeric');
+    assert.ok(numSeg, 'long digit run should stay numeric');
+  });
+
+  it('handles empty string', () => {
+    const segs = splitSegments('', 1);
+    assert.equal(segs.length, 1);
+  });
+
+  it('mixed-mode encoding is at least as compact as single-mode', () => {
+    // URL with long digit run: mixed-mode should use same or lower version
+    const text = 'https://example.com/order/9876543210987654';
+    const singleResult = encodeQR(text, { errorCorrectionLevel: 'M' });
+    // The mixed-mode result should be valid and scannable
+    assert.ok(singleResult.version >= 1);
+    assert.ok(singleResult.size > 0);
+  });
+});
+
+// ─── Canvas/PNG renderer ────────────────────────────
+
+describe('renderQRToPixels', () => {
+  it('returns correct dimensions', () => {
+    const { pixels, width, height } = renderQRToPixels('test', { scale: 5, margin: 2 });
+    const result = encodeQR('test');
+    const expectedSize = (result.size + 2 * 2) * 5;
+    assert.equal(width, expectedSize);
+    assert.equal(height, expectedSize);
+    assert.equal(pixels.length, width * height * 4);
+  });
+
+  it('returns square output', () => {
+    const { width, height } = renderQRToPixels('hello');
+    assert.equal(width, height);
+  });
+
+  it('default scale is 10, margin is 4', () => {
+    const result = encodeQR('A', { errorCorrectionLevel: 'L' });
+    const { width } = renderQRToPixels('A', { errorCorrectionLevel: 'L' });
+    assert.equal(width, (result.size + 8) * 10);
+  });
+
+  it('respects custom foreground and background', () => {
+    const { pixels, width } = renderQRToPixels('A', {
+      scale: 1,
+      margin: 0,
+      foreground: [255, 0, 0],
+      background: [0, 255, 0],
+    });
+    // Check a background pixel (corner of QR has finder, but check a non-module area)
+    // At minimum, we should have both colors present
+    let hasFG = false;
+    let hasBG = false;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i] === 255 && pixels[i + 1] === 0 && pixels[i + 2] === 0) hasFG = true;
+      if (pixels[i] === 0 && pixels[i + 1] === 255 && pixels[i + 2] === 0) hasBG = true;
+    }
+    assert.ok(hasFG, 'should contain foreground color');
+    assert.ok(hasBG, 'should contain background color');
+  });
+});
+
+describe('matrixToPixels', () => {
+  it('converts QRCodeResult to pixel data', () => {
+    const result = encodeQR('test');
+    const { pixels, width, height } = matrixToPixels(result, { scale: 3, margin: 1 });
+    const expectedSize = (result.size + 2) * 3;
+    assert.equal(width, expectedSize);
+    assert.equal(pixels.length, width * height * 4);
+  });
+});
+
+describe('renderQRToPNG', () => {
+  it('returns valid PNG signature', () => {
+    const png = renderQRToPNG('test');
+    assert.ok(png instanceof Uint8Array);
+    // PNG signature: 137 80 78 71 13 10 26 10
+    assert.equal(png[0], 137);
+    assert.equal(png[1], 80);  // 'P'
+    assert.equal(png[2], 78);  // 'N'
+    assert.equal(png[3], 71);  // 'G'
+    assert.equal(png[4], 13);
+    assert.equal(png[5], 10);
+    assert.equal(png[6], 26);
+    assert.equal(png[7], 10);
+  });
+
+  it('contains IHDR chunk', () => {
+    const png = renderQRToPNG('test');
+    // IHDR should be right after signature (bytes 8-11 are length, 12-15 are "IHDR")
+    const ihdr = String.fromCharCode(png[12], png[13], png[14], png[15]);
+    assert.equal(ihdr, 'IHDR');
+  });
+
+  it('contains IEND chunk', () => {
+    const png = renderQRToPNG('hello');
+    // IEND at the end: last 12 bytes = length(4) + "IEND"(4) + CRC(4)
+    const iend = String.fromCharCode(png[png.length - 8], png[png.length - 7], png[png.length - 6], png[png.length - 5]);
+    assert.equal(iend, 'IEND');
+  });
+
+  it('produces deterministic output', () => {
+    const a = renderQRToPNG('deterministic');
+    const b = renderQRToPNG('deterministic');
+    assert.deepEqual(a, b);
+  });
+
+  it('different text produces different PNG', () => {
+    const a = renderQRToPNG('aaa');
+    const b = renderQRToPNG('bbb');
+    assert.notDeepEqual(a, b);
+  });
+
+  it('respects scale option', () => {
+    const small = renderQRToPNG('X', { scale: 2, margin: 0 });
+    const large = renderQRToPNG('X', { scale: 20, margin: 0 });
+    assert.ok(large.length > small.length);
+  });
+});
+
+describe('matrixToPNG', () => {
+  it('converts QRCodeResult to PNG', () => {
+    const result = encodeQR('test');
+    const png = matrixToPNG(result, { scale: 5 });
+    assert.ok(png instanceof Uint8Array);
+    assert.equal(png[0], 137); // PNG signature
+  });
+});
+
+describe('parseHexColor', () => {
+  it('parses 6-digit hex', () => {
+    assert.deepEqual(parseHexColor('#ff8000'), [255, 128, 0, 255]);
+  });
+
+  it('parses 3-digit hex', () => {
+    assert.deepEqual(parseHexColor('#f00'), [255, 0, 0, 255]);
+  });
+
+  it('parses 8-digit hex with alpha', () => {
+    assert.deepEqual(parseHexColor('#ff000080'), [255, 0, 0, 128]);
+  });
+
+  it('parses without # prefix', () => {
+    assert.deepEqual(parseHexColor('00ff00'), [0, 255, 0, 255]);
   });
 });

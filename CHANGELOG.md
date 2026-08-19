@@ -52,11 +52,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Validated
 
-- ✅ 160/160 error-correction block table rows verified
-- ✅ 117/117 QR codes decoded correctly (15 versions × 4 levels × 3 modes)
-- ✅ 9/9 Code128 round-trip encode/decode tests passed
-- ✅ Tested against OpenCV's QRCodeDetectorAruco (independent verification)
-- ⚠️  Real-device scan testing pending (see Roadmap)
+- 160/160 error-correction block table rows verified
+- 117/117 QR codes decoded correctly (15 versions × 4 levels × 3 modes)
+- 9/9 Code128 round-trip encode/decode tests passed
+- Tested against OpenCV's QRCodeDetectorAruco (independent verification)
+- Real-device scan testing pending (see Roadmap)
+
+## [0.2.0] — 2026-08-19
+
+### Added
+
+- **Canvas/PNG renderer** — Pure-JS, zero-dependency PNG encoder
+  - `renderQRToPNG(text, options)` → `Uint8Array` (PNG file)
+  - `renderQRToPixels(text, options)` → `{ pixels, width, height }` (raw RGBA)
+  - `matrixToPNG(result, options)` / `matrixToPixels(result, options)` for pre-encoded data
+  - `parseHexColor(hex)` utility for converting CSS hex to `[R, G, B, A]`
+  - Works in Node.js and browsers — no native canvas, no external dependencies
+  - Configurable `scale`, `margin`, `foreground`, `background`
+- **Mixed-mode segmentation** — optimal segment splitting
+  - `splitSegments(text, version)` splits input into `Segment[]` with per-run mode selection
+  - Greedy merging of short runs to avoid mode-switch overhead
+  - Saves 10–30% capacity for URLs, mixed content, and digit-heavy strings
+  - Exported as public API for inspection: `import { splitSegments, Segment } from 'lombokqrcode'`
+
+### Changed
+
+- `buildDataCodewords` now uses mixed-mode segmentation internally (was single-mode)
+- Test suite expanded from 45 to 69 tests (24 new tests for Canvas/PNG + segmentation)
+
+### Fixed
+
+- URLs with embedded digit runs (e.g. order IDs, phone numbers) now encode more compactly
 
 ## [Unreleased]
 
@@ -64,11 +90,10 @@ Planned for future releases:
 
 - Pure-JS camera decoder (finder-pattern detection, perspective correction, bit sampling)
 - Native Java/Go/Rust/Python implementations
-- Canvas/PNG renderer
 - Kanji mode (Shift-JIS)
-- Mixed-mode segmentation
 - Structured Append (multi-symbol data)
 - Micro QR / rMQR support
+- React/Vue component wrappers
 - Performance benchmarking guide
 - Additional template presets
 

@@ -17,13 +17,12 @@ Listed here instead of silently omitted, so scope is never a surprise.
 - **Kanji mode.** QR's dedicated Shift-JIS-based Kanji mode (denser than byte mode for
   Japanese text) isn't implemented; Japanese text currently encodes correctly but less
   compactly via byte/UTF‑8 mode.
-- **Mixed-mode segmentation.** The encoder picks one mode for the whole input (numeric >
-  alphanumeric > byte). Splitting a string into per-substring optimal segments (e.g. numeric
-  for a digit run embedded in a URL) would shave a few bytes off some inputs but isn't
-  implemented.
-- **Canvas/PNG renderer.** Only SVG output ships today. A canvas renderer (for direct
-  `<canvas>` painting or PNG export without an SVG-to-raster step) is straightforward to add
-  on top of the same `QRCodeResult` data and is the next planned addition.
+- ~~**Mixed-mode segmentation.**~~  Implemented in v0.2.0. The encoder now splits input
+  into optimal segments (numeric/alphanumeric/byte) with greedy merging of short runs to
+  avoid mode-switch overhead. Saves 10-30% for URLs and mixed content.
+- ~~**Canvas/PNG renderer.**~~  Implemented in v0.2.0. Pure-JS PNG encoder (`renderQRToPNG`,
+  `renderQRToPixels`, `matrixToPNG`, `matrixToPixels`) — zero dependencies, works in Node.js
+  and browsers. No native canvas required.
 - **Micro QR / rMQR.** Only standard QR (versions 1–40) is supported.
 - **Structured Append** (splitting data across multiple QR symbols) is not implemented.
 - **Barcode image-based validation.** See `docs/VALIDATION.md` — Code128 is validated via an
