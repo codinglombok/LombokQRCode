@@ -35,8 +35,7 @@ jobs:
         run: npx tsc -p tsconfig.json
 
       - name: Test
-        run: node --test dist-test/__tests__/**/*.test.js
-      
+        run: node --test dist-test/__tests__/*.test.js
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:

@@ -47,7 +47,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean --out-dir dist && tsup src/cli.ts --format cjs --out-dir dist --no-dts",
-    "test": "node --test dist/__tests__/**/*.test.js",
+    "test": "npx tsc -p tsconfig.json && node --test dist-test/__tests__/*.test.js",
     "lint": "tsc --noEmit -p tsconfig.json",
     "prepublishOnly": "npm run build"
   },
