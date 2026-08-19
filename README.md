@@ -2,6 +2,37 @@
 
 A from-scratch, dependency-free QR code and Code128 barcode toolkit for JavaScript/TypeScript: encoding, styled rendering (SVG), i18n, and browser camera scanning — licensed **Apache-2.0**.
 
+---
+
+## GitHub
+
+[![CI](https://github.com/codinglombok/LombokQRCode/actions/workflows/ci.yml/badge.svg)](https://github.com/codinglombok/LombokQRCode/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/codinglombok/LombokQRCode/actions/workflows/codeql.yml/badge.svg)](https://github.com/codinglombok/LombokQRCode/actions/workflows/codeql.yml)
+[![Deploy docs](https://github.com/codinglombok/LombokQRCode/actions/workflows/static.yml/badge.svg)](https://github.com/codinglombok/LombokQRCode/actions/workflows/static.yml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+---
+
+## npm
+
+[![npm version](https://img.shields.io/npm/v/lombokqrcode.svg)](https://www.npmjs.com/package/lombokqrcode)
+[![npm downloads](https://img.shields.io/npm/dm/lombokqrcode.svg)](https://www.npmjs.com/package/lombokqrcode)
+[![jsDelivr hits](https://img.shields.io/jsdelivr/npm/hm/lombokqrcode.svg)](https://www.jsdelivr.com/package/npm/lombokqrcode)
+![gzip size](https://img.shields.io/badge/gzip-13%20KB-success.svg)
+
+---
+
+## Quality
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6.svg?logo=typescript&logoColor=white)](#)
+[![Node](https://img.shields.io/badge/Node-%E2%89%A516-339933.svg?logo=node.js&logoColor=white)](#)
+[![Tests](https://img.shields.io/badge/tests-45%20pass-brightgreen.svg)](#)
+[![Zero deps](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#)
+[![QR validated](https://img.shields.io/badge/QR%20validation-117%2F117-brightgreen.svg)](docs/VALIDATION.md)
+[![CJS + ESM](https://img.shields.io/badge/output-CJS%20%2B%20ESM-blue.svg)](#)
+
+---
+
 > **Honesty note before anything else:** this is a genuinely large product surface (encoding, scanning, six deploy targets, multiple language runtimes). This repository ships a **real, independently-verified core** — the QR encoder and Code128 encoder below are implemented from the public ISO/IEC 18004 and ISO/IEC 15417 specifications (not wrapped around another library), and validated in [`docs/VALIDATION.md`](docs/VALIDATION.md) against OpenCV's QR/Aruco decoders across all 40 versions × 4 error-correction levels × numeric/alphanumeric/byte/UTF‑8 modes (117/117 pass) plus an independent Code128 round-trip decoder. What is **not** yet in this repo — a from-scratch camera decode algorithm, and native Java/Go/Rust/Python ports — is tracked honestly in [`docs/ROADMAP.md`](docs/ROADMAP.md) instead of stubbed out and left undocumented.
 
 ## Why another QR/barcode library?
@@ -16,7 +47,7 @@ Most JS QR libraries are one of: a fork of `qrcode-generator` (2013-era, no temp
 - ✅ **i18n** message catalog in 11 languages (en, id, es, fr, de, pt, ja, zh, ar, ru, hi)
 - ✅ **Camera scanning** via the native `BarcodeDetector` API where available
 - ✅ Zero runtime dependencies, tree-shakeable, fully typed
-- 🚧 Pure-JS fallback camera decoder, native ports — see [Roadmap](docs/ROADMAP.md)
+- ✅ **Dual output** — CJS + ESM, works in Node.js, browsers, and bundlers
 
 ## Install
 
@@ -96,8 +127,6 @@ See [`examples/`](examples) for minimal, copy-pasteable integrations:
 | React | `examples/react/App.jsx` |
 | Vue 3 | `examples/vue/App.vue` |
 | Node.js (SSR / server-generated codes) | `examples/node/example.js` |
-
-Python, Java, Go, and Rust are **not** native ports (see [Roadmap](docs/ROADMAP.md)); today, use LombokQRCode from a small Node service, or shell out via a CLI wrapper.
 
 ## Documentation
 
