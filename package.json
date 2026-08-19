@@ -1,6 +1,6 @@
 {
   "name": "lombokqrcode",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A from-scratch, dependency-free QR code and Code128 barcode library: generation, styled templating, and camera scanning — with i18n, TypeScript types, and MIT/Apache-friendly clean-room encoding.",
   "license": "Apache-2.0",
   "author": "codinglombok",
@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/codinglombok/LombokQRCode/issues"
   },
-   "overrides": {
+  "overrides": {
     "esbuild": ">=0.28.1"
   },
   "keywords": [
