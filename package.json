@@ -12,6 +12,9 @@
   "bugs": {
     "url": "https://github.com/codinglombok/LombokQRCode/issues"
   },
+   "overrides": {
+    "esbuild": ">=0.28.1"
+  },
   "keywords": [
     "qrcode",
     "qr-code",
