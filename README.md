@@ -38,7 +38,7 @@ A from-scratch, dependency-free QR code and Code128 barcode toolkit for JavaScri
 [![CJS + ESM](https://img.shields.io/badge/output-CJS%20%2B%20ESM-blue.svg)](#)
 [![Code style](https://img.shields.io/badge/code%20style-ESLint-4B32C3.svg?logo=eslint&logoColor=white)](#)
 [![Conventional Commits](https://img.shields.io/badge/commits-Conventional-FE5196.svg?logo=conventionalcommits&logoColor=white)](#)
-
+[![Socket Badge](https://badge.socket.dev/npm/package/lombokqrcode)](https://badge.socket.dev/npm/package/lombokqrcode)
 ---
 
 ## SourceForge
@@ -47,15 +47,6 @@ A from-scratch, dependency-free QR code and Code128 barcode toolkit for JavaScri
 [![Download LombokQRCode](https://img.shields.io/sourceforge/dm/lombokqrcode.svg)](https://sourceforge.net/projects/lombokqrcode/)
 [![Download LombokQRCode](https://img.shields.io/sourceforge/dw/lombokqrcode.svg)](https://sourceforge.net/projects/lombokqrcode/)
 [![SourceForge](https://img.shields.io/badge/SourceForge-lombokqrcode-orange.svg?logo=sourceforge&logoColor=white)](https://sourceforge.net/projects/lombokqrcode/)
-
----
-
-## Packagist
-
-[![Packagist Version](https://img.shields.io/packagist/v/codinglombok/lombokqrcode.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
-[![Packagist Downloads](https://img.shields.io/packagist/dt/codinglombok/lombokqrcode.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
-[![Packagist License](https://img.shields.io/packagist/l/codinglombok/lombokqrcode.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
-[![Packagist PHP Version](https://img.shields.io/packagist/dependency-v/codinglombok/lombokqrcode/php.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
 
 ---
 
