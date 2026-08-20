@@ -9,7 +9,10 @@ A from-scratch, dependency-free QR code and Code128 barcode toolkit for JavaScri
 [![CI](https://github.com/codinglombok/LombokQRCode/actions/workflows/ci.yml/badge.svg)](https://github.com/codinglombok/LombokQRCode/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/codinglombok/LombokQRCode/actions/workflows/codeql.yml/badge.svg)](https://github.com/codinglombok/LombokQRCode/actions/workflows/codeql.yml)
 [![Deploy docs](https://github.com/codinglombok/LombokQRCode/actions/workflows/static.yml/badge.svg)](https://github.com/codinglombok/LombokQRCode/actions/workflows/static.yml)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/codinglombok/LombokQRCode.svg)](https://github.com/codinglombok/LombokQRCode/releases)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/codinglombok/LombokQRCode/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/codinglombok/LombokQRCode.svg)](https://github.com/codinglombok/LombokQRCode/issues)
+[![GitHub stars](https://img.shields.io/github/stars/codinglombok/LombokQRCode.svg?style=social)](https://github.com/codinglombok/LombokQRCode)
 
 ---
 
@@ -17,8 +20,11 @@ A from-scratch, dependency-free QR code and Code128 barcode toolkit for JavaScri
 
 [![npm version](https://img.shields.io/npm/v/lombokqrcode.svg)](https://www.npmjs.com/package/lombokqrcode)
 [![npm downloads](https://img.shields.io/npm/dm/lombokqrcode.svg)](https://www.npmjs.com/package/lombokqrcode)
+[![npm total downloads](https://img.shields.io/npm/dt/lombokqrcode.svg)](https://www.npmjs.com/package/lombokqrcode)
 [![jsDelivr hits](https://img.shields.io/jsdelivr/npm/hm/lombokqrcode.svg)](https://www.jsdelivr.com/package/npm/lombokqrcode)
-![gzip size](https://img.shields.io/badge/gzip-13%20KB-success.svg)
+[![npm license](https://img.shields.io/npm/l/lombokqrcode.svg)](https://github.com/codinglombok/LombokQRCode/blob/main/LICENSE)
+[![gzip size](https://img.shields.io/badge/gzip-13%20KB-success.svg)](#)
+[![npm type definitions](https://img.shields.io/npm/types/lombokqrcode.svg)](https://www.npmjs.com/package/lombokqrcode)
 
 ---
 
@@ -26,10 +32,42 @@ A from-scratch, dependency-free QR code and Code128 barcode toolkit for JavaScri
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6.svg?logo=typescript&logoColor=white)](#)
 [![Node](https://img.shields.io/badge/Node-%E2%89%A516-339933.svg?logo=node.js&logoColor=white)](#)
-[![Tests](https://img.shields.io/badge/tests-45%20pass-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-69%20pass-brightgreen.svg)](#)
 [![Zero deps](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#)
-[![QR validated](https://img.shields.io/badge/QR%20validation-117%2F117-brightgreen.svg)](docs/VALIDATION.md)
+[![QR validated](https://img.shields.io/badge/QR%20validation-117%2F117-brightgreen.svg)](https://github.com/codinglombok/LombokQRCode/blob/main/docs/VALIDATION.md)
 [![CJS + ESM](https://img.shields.io/badge/output-CJS%20%2B%20ESM-blue.svg)](#)
+[![Code style](https://img.shields.io/badge/code%20style-ESLint-4B32C3.svg?logo=eslint&logoColor=white)](#)
+[![Conventional Commits](https://img.shields.io/badge/commits-Conventional-FE5196.svg?logo=conventionalcommits&logoColor=white)](#)
+
+---
+
+## SourceForge
+
+[![Download LombokQRCode](https://img.shields.io/sourceforge/dt/lombokqrcode.svg)](https://sourceforge.net/projects/lombokqrcode/)
+[![Download LombokQRCode](https://img.shields.io/sourceforge/dm/lombokqrcode.svg)](https://sourceforge.net/projects/lombokqrcode/)
+[![Download LombokQRCode](https://img.shields.io/sourceforge/dw/lombokqrcode.svg)](https://sourceforge.net/projects/lombokqrcode/)
+[![SourceForge](https://img.shields.io/badge/SourceForge-lombokqrcode-orange.svg?logo=sourceforge&logoColor=white)](https://sourceforge.net/projects/lombokqrcode/)
+
+---
+
+## Packagist
+
+[![Packagist Version](https://img.shields.io/packagist/v/codinglombok/lombokqrcode.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/codinglombok/lombokqrcode.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
+[![Packagist License](https://img.shields.io/packagist/l/codinglombok/lombokqrcode.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
+[![Packagist PHP Version](https://img.shields.io/packagist/dependency-v/codinglombok/lombokqrcode/php.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
+
+---
+
+## Community
+
+[![GitHub contributors](https://img.shields.io/github/contributors/codinglombok/LombokQRCode.svg)](https://github.com/codinglombok/LombokQRCode/graphs/contributors)
+[![GitHub last commit](https://img.shields.io/github/last-commit/codinglombok/LombokQRCode.svg)](https://github.com/codinglombok/LombokQRCode/commits/main)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/codinglombok/LombokQRCode.svg)](https://github.com/codinglombok/LombokQRCode/commits/main)
+[![GitHub repo size](https://img.shields.io/github/repo-size/codinglombok/LombokQRCode.svg)](https://github.com/codinglombok/LombokQRCode)
+[![GitHub code size](https://img.shields.io/github/languages/code-size/codinglombok/LombokQRCode.svg)](https://github.com/codinglombok/LombokQRCode)
+[![GitHub forks](https://img.shields.io/github/forks/codinglombok/LombokQRCode.svg?style=social)](https://github.com/codinglombok/LombokQRCode/network/members)
+[![GitHub watchers](https://img.shields.io/github/watchers/codinglombok/LombokQRCode.svg?style=social)](https://github.com/codinglombok/LombokQRCode/watchers)
 
 ---
 
@@ -48,6 +86,7 @@ Most JS QR libraries are one of: a fork of `qrcode-generator` (2013-era, no temp
 - ✅ **Camera scanning** via the native `BarcodeDetector` API where available
 - ✅ Zero runtime dependencies, tree-shakeable, fully typed
 - ✅ **Dual output** — CJS + ESM, works in Node.js, browsers, and bundlers
+- 🚧 Pure-JS fallback camera decoder, native ports — see [Roadmap](docs/ROADMAP.md)
 
 ## Install
 
@@ -64,7 +103,7 @@ npm install lombokqrcode
 
 ## Quick start
 
-```ts
+```js
 import { encodeQR, renderQRToSVG, renderCode128ToSVG } from 'lombokqrcode';
 
 // Raw module matrix (bring your own renderer)
@@ -80,7 +119,7 @@ const barcodeSvg = renderCode128ToSVG('SKU-00119827');
 
 ### Templating
 
-```ts
+```js
 import { renderQRToSVG, listTemplates } from 'lombokqrcode';
 
 listTemplates(); // ['classic', 'rounded', 'dots', 'ocean', 'sunset', 'midnight']
@@ -101,7 +140,7 @@ renderQRToSVG('https://example.com', {
 
 ### i18n
 
-```ts
+```js
 import { getMessages } from 'lombokqrcode';
 const t = getMessages('id');
 console.log(t.scanPromptCamera); // "Arahkan kamera Anda ke kode untuk memindainya."
@@ -109,7 +148,7 @@ console.log(t.scanPromptCamera); // "Arahkan kamera Anda ke kode untuk memindain
 
 ### Scanning (browser)
 
-```ts
+```js
 import { LombokScanner } from 'lombokqrcode';
 
 const scanner = new LombokScanner();
@@ -121,12 +160,14 @@ scanner.watch((results) => console.log(results[0].rawValue));
 
 See [`examples/`](examples) for minimal, copy-pasteable integrations:
 
-| Target | Path |
-|---|---|
-| Vanilla JS / unpkg | `examples/vanilla/index.html` |
-| React | `examples/react/App.jsx` |
-| Vue 3 | `examples/vue/App.vue` |
-| Node.js (SSR / server-generated codes) | `examples/node/example.js` |
+| Target                                 | Path                          |
+| -------------------------------------- | ----------------------------- |
+| Vanilla JS / unpkg                     | `examples/vanilla/index.html` |
+| React                                  | `examples/react/App.jsx`      |
+| Vue 3                                  | `examples/vue/App.vue`        |
+| Node.js (SSR / server-generated codes) | `examples/node/example.js`    |
+
+Python, Java, Go, and Rust are **not** native ports (see [Roadmap](docs/ROADMAP.md)); today, use LombokQRCode from a small Node service, or shell out via a CLI wrapper.
 
 ## Documentation
 
