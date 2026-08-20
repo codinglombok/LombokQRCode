@@ -1,0 +1,32 @@
+{
+    "name": "codinglombok/lombokqrcode",
+    "description": "A from-scratch, dependency-free QR code and Code128 barcode toolkit for JavaScript/TypeScript: encoding, styled rendering (SVG), i18n, and browser camera scanning.",
+    "type": "library",
+    "license": "Apache-2.0",
+    "keywords": [
+        "qrcode",
+        "qr-code",
+        "barcode",
+        "code128",
+        "svg",
+        "encoding",
+        "scanning",
+        "i18n",
+        "typescript",
+        "javascript",
+        "zero-dependency",
+        "lombok"
+    ],
+    "homepage": "https://github.com/codinglombok/LombokQRCode",
+    "support": {
+        "issues": "https://github.com/codinglombok/LombokQRCode/issues",
+        "source": "https://github.com/codinglombok/LombokQRCode",
+        "docs": "https://github.com/codinglombok/LombokQRCode/blob/main/docs/API.md"
+    },
+    "authors": [
+        {
+            "name": "codinglombok",
+            "homepage": "https://github.com/codinglombok"
+        }
+    ]
+}
