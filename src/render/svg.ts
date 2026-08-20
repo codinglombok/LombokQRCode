@@ -78,6 +78,15 @@ function sanitizeNumber(value: unknown, fallback: number, min?: number, max?: nu
   return out;
 }
 
+function escapeXmlAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/'/g, '&apos;');
+}
+
 function sanitizeLogoHref(value: string | undefined): string | undefined {
   if (!value) return undefined;
   const v = value.trim();
@@ -157,29 +166,30 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
   const safeBackground = sanitizeColor(t.background, '#ffffff');
   const safeForeground = sanitizeColor(t.foreground, '#000000');
   const gradientId = 'lombok-qr-gradient';
+  const safeGradientId = escapeXmlAttr(gradientId);
   let defs = '';
   let fillRef = safeForeground;
   if (t.gradient) {
     const { type, colors, angle = 0 } = t.gradient;
-    const c0 = sanitizeColor(colors[0], safeForeground);
-    const c1 = sanitizeColor(colors[1], safeForeground);
+    const c0 = escapeXmlAttr(sanitizeColor(colors[0], safeForeground));
+    const c1 = escapeXmlAttr(sanitizeColor(colors[1], safeForeground));
     if (type === 'linear') {
       const rad = (angle * Math.PI) / 180;
       const x2 = (Math.cos(rad) * 50 + 50).toFixed(1);
       const y2 = (Math.sin(rad) * 50 + 50).toFixed(1);
       const x1 = (100 - Number(x2)).toFixed(1);
       const y1 = (100 - Number(y2)).toFixed(1);
-      defs = `<linearGradient id="${gradientId}" x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%">
+      defs = `<linearGradient id="${safeGradientId}" x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%">
         <stop offset="0%" stop-color="${c0}" />
         <stop offset="100%" stop-color="${c1}" />
       </linearGradient>`;
     } else {
-      defs = `<radialGradient id="${gradientId}">
+      defs = `<radialGradient id="${safeGradientId}">
         <stop offset="0%" stop-color="${c0}" />
         <stop offset="100%" stop-color="${c1}" />
       </radialGradient>`;
     }
-    fillRef = `url(#${gradientId})`;
+    fillRef = `url(#${safeGradientId})`;
   }
 
   const dots: string[] = [];
