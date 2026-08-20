@@ -228,10 +228,15 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+  const safeBackgroundAttr = safeBackground
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${px} ${px}" width="${px}" height="${px}" role="img" aria-label="QR code">
   ${defs ? `<defs>${defs}</defs>` : ''}
-  <rect width="${px}" height="${px}" fill="${safeBackground}" />
+  <rect width="${px}" height="${px}" fill="${safeBackgroundAttr}" />
   <g fill="${safeFillRefAttr}">${dots.join('')}</g>
   <g style="color:${safeFillRefAttr}">${finders.join('')}</g>
   ${logoMarkup}
