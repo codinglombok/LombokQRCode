@@ -50,15 +50,6 @@ A from-scratch, dependency-free QR code and Code128 barcode toolkit for JavaScri
 
 ---
 
-## Packagist
-
-[![Packagist Version](https://img.shields.io/packagist/v/codinglombok/lombokqrcode.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
-[![Packagist Downloads](https://img.shields.io/packagist/dt/codinglombok/lombokqrcode.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
-[![Packagist License](https://img.shields.io/packagist/l/codinglombok/lombokqrcode.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
-[![Packagist PHP Version](https://img.shields.io/packagist/dependency-v/codinglombok/lombokqrcode/php.svg)](https://packagist.org/packages/codinglombok/lombokqrcode)
-
----
-
 ## Community
 
 [![GitHub contributors](https://img.shields.io/github/contributors/codinglombok/LombokQRCode.svg)](https://github.com/codinglombok/LombokQRCode/graphs/contributors)
