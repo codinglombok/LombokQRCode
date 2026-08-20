@@ -1,0 +1,368 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# LombokQRCode — Publish to ALL 5 GitHub Packages Registries
+# Triggered on every release tag (v*). Publishes:
+#   1. npm          → npm.pkg.github.com
+#   2. Container    → ghcr.io
+#   3. Maven        → maven.pkg.github.com (webjar)
+#   4. NuGet        → nuget.pkg.github.com
+#   5. RubyGems     → rubygems.pkg.github.com
+# ──────────────────────────────────────────────────────────────────────────────
+name: Publish GitHub Packages (All Registries)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 0. Build once, share artifacts
+  # ═══════════════════════════════════════════════════════════════════════════
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            dist/
+            package.json
+            README.md
+            LICENSE
+          retention-days: 1
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 1. npm → GitHub Packages
+  # ═══════════════════════════════════════════════════════════════════════════
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: dist }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@codinglombok'
+
+      # GitHub Packages npm requires @owner/pkg scope
+      - name: Scope package for GPR
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
+            pkg.name = '@codinglombok/lombokqrcode';
+            pkg.publishConfig = { registry: 'https://npm.pkg.github.com' };
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 2. Container → ghcr.io
+  # ═══════════════════════════════════════════════════════════════════════════
+  publish-container:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/lombokqrcode
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ needs.build.outputs.version }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.description=LombokQRCode — pure-JS QR & Code128 toolkit
+            org.opencontainers.image.licenses=Apache-2.0
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 3. Maven → GitHub Packages (webjar)
+  # ═══════════════════════════════════════════════════════════════════════════
+  publish-maven:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: dist }
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # setup-java needs a settings.xml for GitHub Packages auth
+      - name: Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'XML'
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          XML
+
+      - name: Build webjar & deploy
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          WJ="src/main/resources/META-INF/resources/webjars/lombokqrcode/${VERSION}"
+
+          mkdir -p "${WJ}"
+          cp -r dist/*  "${WJ}/"
+          cp README.md  "${WJ}/"
+          cp LICENSE     "${WJ}/"
+
+          cat > pom.xml << POMEOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <project xmlns="http://maven.apache.org/POM/4.0.0"
+                   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                   http://maven.apache.org/xsd/maven-4.0.0.xsd"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>com.github.codinglombok</groupId>
+            <artifactId>lombokqrcode</artifactId>
+            <version>${VERSION}</version>
+            <packaging>jar</packaging>
+            <name>LombokQRCode</name>
+            <description>Pure-JS QR code and Code128 barcode toolkit — webjar</description>
+            <url>https://github.com/codinglombok/LombokQRCode</url>
+            <licenses>
+              <license>
+                <name>Apache-2.0</name>
+                <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+              </license>
+            </licenses>
+            <scm>
+              <url>https://github.com/codinglombok/LombokQRCode</url>
+            </scm>
+            <distributionManagement>
+              <repository>
+                <id>github</id>
+                <url>https://maven.pkg.github.com/codinglombok/LombokQRCode</url>
+              </repository>
+            </distributionManagement>
+          </project>
+          POMEOF
+
+          mvn deploy -B -DskipTests
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 4. NuGet → GitHub Packages
+  # ═══════════════════════════════════════════════════════════════════════════
+  publish-nuget:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: dist }
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Pack & push
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+
+          # Create minimal csproj (more reliable than .nuspec on Linux)
+          mkdir -p nuget-pkg/content/dist
+          cp -r dist/* nuget-pkg/content/dist/
+          cp README.md nuget-pkg/
+          cp LICENSE nuget-pkg/
+
+          cat > nuget-pkg/LombokQRCode.csproj << CSPROJ
+          <Project Sdk="Microsoft.NET.Sdk">
+            <PropertyGroup>
+              <TargetFramework>netstandard2.0</TargetFramework>
+              <PackageId>codinglombok.LombokQRCode</PackageId>
+              <Version>${VERSION}</Version>
+              <Authors>codinglombok</Authors>
+              <Description>Pure-JS QR code and Code128 barcode toolkit — zero dependencies, SVG/PNG/Canvas rendering, i18n, camera scanning</Description>
+              <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+              <PackageProjectUrl>https://github.com/codinglombok/LombokQRCode</PackageProjectUrl>
+              <RepositoryUrl>https://github.com/codinglombok/LombokQRCode</RepositoryUrl>
+              <RepositoryType>git</RepositoryType>
+              <PackageTags>qrcode barcode code128 svg javascript typescript</PackageTags>
+              <PackageReadmeFile>README.md</PackageReadmeFile>
+              <IncludeBuildOutput>false</IncludeBuildOutput>
+              <NoBuild>true</NoBuild>
+              <NoDefaultExcludes>true</NoDefaultExcludes>
+            </PropertyGroup>
+            <ItemGroup>
+              <Content Include="content/**/*" PackagePath="content/" />
+              <None Include="README.md" Pack="true" PackagePath="/" />
+              <None Include="LICENSE" Pack="true" PackagePath="/" />
+            </ItemGroup>
+          </Project>
+          CSPROJ
+
+          cd nuget-pkg
+          dotnet pack -o ../nupkg --no-build -p:NoBuild=true 2>/dev/null || \
+            dotnet pack -o ../nupkg 2>/dev/null || true
+
+          # Fallback: manual nupkg creation if dotnet pack fails
+          if [ ! -f ../nupkg/*.nupkg ]; then
+            echo "dotnet pack failed, building nupkg manually..."
+            mkdir -p _pack
+            cat > _pack/codinglombok.LombokQRCode.nuspec << NUSPEC
+          <?xml version="1.0" encoding="utf-8"?>
+          <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+            <metadata>
+              <id>codinglombok.LombokQRCode</id>
+              <version>${VERSION}</version>
+              <authors>codinglombok</authors>
+              <description>Pure-JS QR code and Code128 barcode toolkit</description>
+              <license type="expression">Apache-2.0</license>
+              <projectUrl>https://github.com/codinglombok/LombokQRCode</projectUrl>
+              <repository type="git" url="https://github.com/codinglombok/LombokQRCode.git" />
+              <tags>qrcode barcode code128</tags>
+            </metadata>
+          </package>
+          NUSPEC
+            cp -r content _pack/
+            cp LICENSE README.md _pack/
+            cd _pack
+            zip -r ../../nupkg/codinglombok.LombokQRCode.${VERSION}.nupkg . -x '.*'
+            cd ..
+          fi
+          cd ..
+
+          # Push
+          dotnet nuget add source \
+            --username codinglombok \
+            --password ${{ secrets.GITHUB_TOKEN }} \
+            --store-password-in-clear-text \
+            --name github \
+            "https://nuget.pkg.github.com/codinglombok/index.json"
+
+          dotnet nuget push "nupkg/*.nupkg" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --source github \
+            --skip-duplicate
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 5. RubyGems → GitHub Packages
+  # ═══════════════════════════════════════════════════════════════════════════
+  publish-rubygems:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: dist }
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Build & push gem
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+
+          # Gem structure
+          mkdir -p gem-pkg/lib/lombokqrcode/dist
+          cp -r dist/* gem-pkg/lib/lombokqrcode/dist/
+          cp LICENSE  gem-pkg/
+          cp README.md gem-pkg/
+
+          cat > gem-pkg/lib/lombokqrcode/version.rb << RB
+          module LombokQRCode
+            VERSION = "${VERSION}"
+          end
+          RB
+
+          cat > gem-pkg/lib/lombokqrcode.rb << 'RB'
+          require_relative "lombokqrcode/version"
+
+          module LombokQRCode
+            def self.dist_path
+              File.join(File.dirname(__FILE__), "lombokqrcode", "dist")
+            end
+            def self.cjs_path  = File.join(dist_path, "index.js")
+            def self.esm_path  = File.join(dist_path, "index.mjs")
+          end
+          RB
+
+          cat > gem-pkg/lombokqrcode.gemspec << GEMSPEC
+          require_relative "lib/lombokqrcode/version"
+
+          Gem::Specification.new do |s|
+            s.name        = "lombokqrcode"
+            s.version     = LombokQRCode::VERSION
+            s.summary     = "Pure-JS QR code and Code128 barcode toolkit"
+            s.description = "Zero-dependency QR code (v1-40) and Code128 barcode library with SVG/PNG rendering, styled templates, camera scanning, and i18n."
+            s.authors     = ["codinglombok"]
+            s.homepage    = "https://github.com/codinglombok/LombokQRCode"
+            s.license     = "Apache-2.0"
+            s.files       = Dir["lib/**/*", "LICENSE", "README.md"]
+            s.require_paths = ["lib"]
+            s.metadata    = {
+              "source_code_uri" => "https://github.com/codinglombok/LombokQRCode",
+              "github_repo"     => "ssh://github.com/codinglombok/LombokQRCode"
+            }
+            s.required_ruby_version = ">= 2.7.0"
+          end
+          GEMSPEC
+
+          cd gem-pkg
+          gem build lombokqrcode.gemspec
+
+          # Auth
+          mkdir -p ~/.gem
+          echo "---"                                     > ~/.gem/credentials
+          echo ":github: Bearer ${GITHUB_TOKEN}"        >> ~/.gem/credentials
+          chmod 0600 ~/.gem/credentials
+
+          gem push --key github \
+            --host https://rubygems.pkg.github.com/codinglombok \
+            "lombokqrcode-${VERSION}.gem"
