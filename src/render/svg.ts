@@ -165,6 +165,11 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
 
   const safeBackground = sanitizeColor(t.background, '#ffffff');
   const safeForeground = sanitizeColor(t.foreground, '#000000');
+  const safeBackgroundAttr = safeBackground
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
   const gradientId = 'lombok-qr-gradient';
   const safeGradientId = escapeXmlAttr(gradientId);
   let defs = '';
@@ -225,20 +230,22 @@ export function matrixToSVG(result: QRCodeResult, template?: QRTemplate | string
     const logoX = sanitizeNumber((px - logoSize) / 2, 0);
     const logoY = sanitizeNumber((px - logoSize) / 2, 0);
     const bg = t.logo.backgroundInset
-      ? `<rect x="${sanitizeNumber(logoX - moduleSize, 0)}" y="${sanitizeNumber(logoY - moduleSize, 0)}" width="${sanitizeNumber(logoSize + moduleSize * 2, 0)}" height="${sanitizeNumber(logoSize + moduleSize * 2, 0)}" rx="${sanitizeNumber(moduleSize, 10, 0)}" fill="${safeBackground}" />`
+      ? `<rect x="${sanitizeNumber(logoX - moduleSize, 0)}" y="${sanitizeNumber(logoY - moduleSize, 0)}" width="${sanitizeNumber(logoSize + moduleSize * 2, 0)}" height="${sanitizeNumber(logoSize + moduleSize * 2, 0)}" rx="${sanitizeNumber(moduleSize, 10, 0)}" fill="${safeBackgroundAttr}" />`
       : '';
     const safeLogoHref = sanitizeLogoHref(t.logo.href);
-    logoMarkup = safeLogoHref
-      ? `${bg}<image href="${safeLogoHref}" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" preserveAspectRatio="xMidYMid meet" />`
+    const safeLogoHrefAttr = safeLogoHref
+      ? safeLogoHref
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+      : '';
+    logoMarkup = safeLogoHrefAttr
+      ? `${bg}<image href="${safeLogoHrefAttr}" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" preserveAspectRatio="xMidYMid meet" />`
       : '';
   }
 
   const safeFillRefAttr = fillRef
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-  const safeBackgroundAttr = safeBackground
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
