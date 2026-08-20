@@ -38,7 +38,7 @@ A from-scratch, dependency-free QR code and Code128 barcode toolkit for JavaScri
 [![CJS + ESM](https://img.shields.io/badge/output-CJS%20%2B%20ESM-blue.svg)](#)
 [![Code style](https://img.shields.io/badge/code%20style-ESLint-4B32C3.svg?logo=eslint&logoColor=white)](#)
 [![Conventional Commits](https://img.shields.io/badge/commits-Conventional-FE5196.svg?logo=conventionalcommits&logoColor=white)](#)
-
+[![Socket Badge](https://badge.socket.dev/npm/package/lombokqrcode)](https://badge.socket.dev/npm/package/lombokqrcode)
 ---
 
 ## SourceForge
