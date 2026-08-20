@@ -1,0 +1,58 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# LombokQRCode — Publish to npmjs.org + create GitHub Release
+# Triggered on tag push (v*) or manual dispatch.
+# Quality gate: typecheck (lint) → build → test.
+#
+# Does NOT replace: publish-packages.yml (GitHub Packages — all 5 registries)
+#
+# NOTE: This replaces the old publish.yml. Delete publish.yml after deploying
+# this file.
+# ──────────────────────────────────────────────────────────────────────────────
+name: Publish to npm
+
+permissions:
+  contents: read
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+      - run: npm ci
+
+      - name: Quality gate
+        run: |
+          npm run lint
+          npm run build
+          npm test
+
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/**/*
+            package.json
+            README.md
+            LICENSE
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
